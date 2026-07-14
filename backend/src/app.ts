@@ -5,39 +5,43 @@ import cookieParser from "cookie-parser";
 import healthModule from "./modules/health/index.js";
 import { notFoundMiddleware } from "./middlewares/not-found.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
+import  authRoutes  from "./modules/auth/auth.routes.js";
 
 const app = express();
-
-//Security_Middleware
+// Security
 app.use(helmet());
-//CORS Middleware
+
+// CORS
 app.use(
   cors({
     origin: "http://localhost:5173",
     credentials: true,
   })
 );
-//Body Parser Middleware
+
+// Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-//cookie Parser middleware
+
+// Cookies
 app.use(cookieParser());
-app.use(notFoundMiddleware);
 
-app.use(errorMiddleware);
+// Routes
 app.use("/api/v1/health", healthModule);
+app.use("/api/v1/auth", authRoutes);
 
-
-
-
-
-
-//health check route
+// Root Route
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
     message: "Adaptive Tutor AI Backend is Running 🚀",
   });
 });
+
+// 404 (ALWAYS LAST)
+app.use(notFoundMiddleware);
+
+// Error Handler (ABSOLUTELY LAST)
+app.use(errorMiddleware);
 
 export default app;
