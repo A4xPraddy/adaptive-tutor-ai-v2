@@ -6,6 +6,8 @@ import healthModule from "./modules/health/index.js";
 import { notFoundMiddleware } from "./middlewares/not-found.middleware.js";
 import { errorMiddleware } from "./middlewares/error.middleware.js";
 import  authRoutes  from "./modules/auth/auth.routes.js";
+import goalRoutes from "./modules/learning/goals/goals.routes.js";
+import roadmapRoutes from "./modules/learning/roadmap/roadmap.routes.js";
 
 const app = express();
 // Security
@@ -29,6 +31,8 @@ app.use(cookieParser());
 // Routes
 app.use("/api/v1/health", healthModule);
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/goals", goalRoutes);
+app.use("/api/v1/roadmaps", roadmapRoutes);
 
 // Root Route
 app.get("/", (req, res) => {
