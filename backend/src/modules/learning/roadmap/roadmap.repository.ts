@@ -65,6 +65,22 @@ export const getRoadmapById = async (roadmapId: string) => {
   });
 };
 
+export const getRoadmapModuleById = async (
+  moduleId: string
+) => {
+  return prisma.roadmapModule.findUnique({
+    where: {
+      id: moduleId,
+    },
+    include: {
+      roadmap: {
+        include: {
+          goal: true,
+        },
+      },
+    },
+  });
+};
 export const deleteRoadmap = async (
   tx: Prisma.TransactionClient,
   roadmapId: string

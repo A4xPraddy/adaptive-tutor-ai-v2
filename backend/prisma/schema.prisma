@@ -108,10 +108,7 @@ model Lesson {
   title   String
   content String
 
-  order Int
-
-  // Relations
-  moduleId String
+  moduleId String @unique
   module   RoadmapModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())

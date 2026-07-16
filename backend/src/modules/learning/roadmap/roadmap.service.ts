@@ -1,5 +1,5 @@
 import { prisma } from "../../../lib/prisma.js";
-import { MockRoadmapProvider } from "../../ai/mock.provider.js";
+import { generateRoadmap } from "../../ai/roadmap.generator.js";
 import { getGoalById } from "../goals/goals.repository.js";
 import {
   createRoadmap,
@@ -24,8 +24,10 @@ export const generateRoadmapService = async (goalId: string) => {
     return existingRoadmap;
   }
 
-  const provider = new MockRoadmapProvider();
-  const modules = await provider.generate(goal.title);
+  const modules = await generateRoadmap(
+    goal.title,
+    goal.experienceLevel
+  );
 
   return prisma.$transaction(async (tx) => {
     const roadmap = await createRoadmap(

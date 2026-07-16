@@ -8,7 +8,7 @@ import { errorMiddleware } from "./middlewares/error.middleware.js";
 import  authRoutes  from "./modules/auth/auth.routes.js";
 import goalRoutes from "./modules/learning/goals/goals.routes.js";
 import roadmapRoutes from "./modules/learning/roadmap/roadmap.routes.js";
-
+import lessonRoutes from "./modules/learning/lessons/lesson.routes.js";
 const app = express();
 // Security
 app.use(helmet());
@@ -33,7 +33,7 @@ app.use("/api/v1/health", healthModule);
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/roadmaps", roadmapRoutes);
-
+app.use("/api/v1/lessons", lessonRoutes);
 // Root Route
 app.get("/", (req, res) => {
   res.status(200).json({

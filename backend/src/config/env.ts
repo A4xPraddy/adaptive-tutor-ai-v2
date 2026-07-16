@@ -14,5 +14,5 @@ export const env = {
 
   // AI
   GROQ_API_KEY: process.env.GROQ_API_KEY,
-  AI_MODEL: process.env.AI_MODEL,
+ AI_MODEL: process.env.AI_MODEL ?? "llama-3.3-70b-versatile",
 };

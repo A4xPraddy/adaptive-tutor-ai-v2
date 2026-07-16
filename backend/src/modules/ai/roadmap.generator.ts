@@ -1,35 +1,26 @@
-export const generateRoadmap = (goal: string) => {
-  switch (goal.toLowerCase()) {
-    case "become backend engineer":
-      return [
-        "JavaScript",
-        "Node.js",
-        "Express.js",
-        "Authentication",
-        "Prisma",
-        "Redis",
-        "Docker",
-        "AWS",
-      ];
+import { buildRoadmapPrompt } from "./prompt.builder.js";
+import { GroqProvider } from "./groq.provider.js";
+import { RoadmapItem } from "./roadmap.provider.js";
 
-    case "become ai engineer":
-      return [
-        "Python",
-        "NumPy",
-        "Pandas",
-        "Machine Learning",
-        "Deep Learning",
-        "LLMs",
-        "RAG",
-        "AI Agents",
-      ];
+const groq = new GroqProvider();
 
-    default:
-      return [
-        "Introduction",
-        "Basics",
-        "Intermediate",
-        "Advanced",
-      ];
+export const generateRoadmap = async (
+  goal: string,
+  level: string
+): Promise<RoadmapItem[]> => {
+  const prompt = buildRoadmapPrompt(goal, level);
+
+  const response = await groq.generate(prompt);
+
+  try {
+    const roadmap = JSON.parse(response) as RoadmapItem[];
+
+    if (!Array.isArray(roadmap)) {
+      throw new Error("Invalid roadmap format");
+    }
+
+    return roadmap;
+  } catch (error) {
+    throw new Error("Failed to parse AI roadmap response.");
   }
 };
