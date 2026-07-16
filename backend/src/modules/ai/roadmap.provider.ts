@@ -1,5 +1,6 @@
 export interface RoadmapItem {
   title: string;
+  description?: string;
   order: number;
 }
 

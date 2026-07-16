@@ -1,8 +1,9 @@
 import { prisma } from "../../../lib/prisma.js";
 import { CreateGoalInput } from "./goals.schema.js";
+import { Prisma } from "@prisma/client";
 
 export const createGoal = async (
-  tx: typeof prisma,
+  tx: Prisma.TransactionClient,
   userId: string,
   data: CreateGoalInput
 ) => {
@@ -21,6 +22,14 @@ export const getGoalsByUserId = async (userId: string) => {
     },
     orderBy: {
       createdAt: "desc",
+    },
+  });
+};
+
+export const getGoalById = async (goalId: string) => {
+  return prisma.goal.findUnique({
+    where: {
+      id: goalId,
     },
   });
 };

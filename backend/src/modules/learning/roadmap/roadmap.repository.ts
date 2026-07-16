@@ -1,28 +1,77 @@
 import { prisma } from "../../../lib/prisma.js";
+import { Prisma } from "@prisma/client";
 
-export const createRoadmaps = async (
-  tx: typeof prisma,
+export const createRoadmap = async (
+  tx: Prisma.TransactionClient,
   goalId: string,
-  roadmaps: string[]
+  title: string,
+  description?: string
 ) => {
-  return tx.roadmap.createMany({
-    data: roadmaps.map((title, index) => ({
-      title,
-      order: index + 1,
+  return tx.roadmap.create({
+    data: {
       goalId,
+      title,
+      description,
+    },
+  });
+};
+
+export const createRoadmapModules = async (
+  tx: Prisma.TransactionClient,
+  roadmapId: string,
+  modules: {
+    title: string;
+    description?: string;
+    order: number;
+  }[]
+) => {
+  return tx.roadmapModule.createMany({
+    data: modules.map((module) => ({
+      roadmapId,
+      title: module.title,
+      description: module.description,
+      order: module.order,
     })),
   });
 };
 
-export const getRoadmapsByGoalId = async (
-  goalId: string
-) => {
-  return prisma.roadmap.findMany({
+export const getRoadmapByGoalId = async (goalId: string) => {
+  return prisma.roadmap.findFirst({
     where: {
       goalId,
     },
-    orderBy: {
-      order: "asc",
+    include: {
+      modules: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+  });
+};
+
+export const getRoadmapById = async (roadmapId: string) => {
+  return prisma.roadmap.findUnique({
+    where: {
+      id: roadmapId,
+    },
+    include: {
+      modules: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+  });
+};
+
+export const deleteRoadmap = async (
+  tx: Prisma.TransactionClient,
+  roadmapId: string
+) => {
+  return tx.roadmap.delete({
+    where: {
+      id: roadmapId,
     },
   });
 };
