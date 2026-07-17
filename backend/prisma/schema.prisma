@@ -25,6 +25,12 @@ enum GoalStatus {
   COMPLETED
 }
 
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
 model User {
   id         String   @id @default(uuid())
   fullName   String
@@ -34,7 +40,8 @@ model User {
   isVerified Boolean  @default(false)
 
   // Relations
-  goals Goal[]
+  goals    Goal[]
+  progress Progress[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -54,7 +61,7 @@ model Goal {
 
   // Relations
   userId String
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   roadmaps Roadmap[]
 
@@ -72,7 +79,7 @@ model Roadmap {
 
   // Relations
   goalId String
-  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goal   Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   modules RoadmapModule[]
 
@@ -96,6 +103,8 @@ model RoadmapModule {
 
   lessons Lesson[]
 
+  progress Progress[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -114,5 +123,29 @@ model Lesson {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@index([moduleId])
+}
+
+model Progress {
+  id String @id @default(uuid())
+
+  status ProgressStatus @default(IN_PROGRESS)
+
+  startedAt DateTime @default(now())
+  completedAt DateTime?
+
+  // Relations
+  userId String
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  moduleId String
+  module RoadmapModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([userId, moduleId])
+
+  @@index([userId])
   @@index([moduleId])
 }

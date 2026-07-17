@@ -9,6 +9,8 @@ import  authRoutes  from "./modules/auth/auth.routes.js";
 import goalRoutes from "./modules/learning/goals/goals.routes.js";
 import roadmapRoutes from "./modules/learning/roadmap/roadmap.routes.js";
 import lessonRoutes from "./modules/learning/lessons/lesson.routes.js";
+import progressRoutes from "./modules/learning/progress/progress.routes.js";
+
 const app = express();
 // Security
 app.use(helmet());
@@ -34,6 +36,8 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/goals", goalRoutes);
 app.use("/api/v1/roadmaps", roadmapRoutes);
 app.use("/api/v1/lessons", lessonRoutes);
+app.use("/api/v1/progress", progressRoutes);
+
 // Root Route
 app.get("/", (req, res) => {
   res.status(200).json({
