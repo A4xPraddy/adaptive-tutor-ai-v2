@@ -2,6 +2,7 @@ import { Router } from "express";
 import { protectRoute } from "../../auth/auth.middleware.js";
 import {
   generateLessonController,
+  regenerateLessonController,
   getLessonController,
 } from "./lesson.controller.js";
 
@@ -11,6 +12,12 @@ router.post(
   "/generate/:moduleId",
   protectRoute,
   generateLessonController
+);
+
+router.post(
+  "/regenerate/:moduleId",
+  protectRoute,
+  regenerateLessonController
 );
 
 router.get(

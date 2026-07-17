@@ -1,5 +1,6 @@
 import { buildRoadmapPrompt } from "./prompt.builder.js";
 import { GroqProvider } from "./groq.provider.js";
+import { AIResponseParser } from "./response.parser.js";
 import { RoadmapItem } from "./roadmap.provider.js";
 
 const groq = new GroqProvider();
@@ -10,17 +11,27 @@ export const generateRoadmap = async (
 ): Promise<RoadmapItem[]> => {
   const prompt = buildRoadmapPrompt(goal, level);
 
-  const response = await groq.generate(prompt);
+  const start = Date.now();
 
-  try {
-    const roadmap = JSON.parse(response) as RoadmapItem[];
+  const rawResponse = await groq.generate(prompt);
 
-    if (!Array.isArray(roadmap)) {
-      throw new Error("Invalid roadmap format");
-    }
+  const duration = Date.now() - start;
 
-    return roadmap;
-  } catch (error) {
-    throw new Error("Failed to parse AI roadmap response.");
+  console.log("========= AI Roadmap Generation =========");
+  console.log(`Provider : Groq`);
+  console.log(`Goal     : ${goal}`);
+  console.log(`Level    : ${level}`);
+  console.log(`Time     : ${duration} ms`);
+  console.log(`Prompt   : ${prompt.length} chars`);
+  console.log(`Response : ${rawResponse.length} chars`);
+  console.log("=========================================");
+
+  const roadmap =
+    AIResponseParser.parseJson<RoadmapItem[]>(rawResponse);
+
+  if (!Array.isArray(roadmap)) {
+    throw new Error("Invalid roadmap format returned by AI.");
   }
+
+  return roadmap;
 };

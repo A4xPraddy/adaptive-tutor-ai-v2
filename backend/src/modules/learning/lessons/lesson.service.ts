@@ -4,6 +4,7 @@ import { getRoadmapModuleById } from "../roadmap/roadmap.repository.js";
 import {
   createLesson,
   getLessonByModuleId,
+  updateLesson,
 } from "./lesson.repository.js";
 
 export const getLessonService = async (
@@ -40,6 +41,42 @@ export const generateLessonService = async (
       module.id,
       lesson.title,
       lesson.content
+    );
+  });
+};
+
+export const regenerateLessonService = async (
+  moduleId: string
+) => {
+  const module = await getRoadmapModuleById(moduleId);
+
+  if (!module) {
+    throw new Error("Roadmap module not found");
+  }
+
+  const generatedLesson = await generateLesson(
+    module.title,
+    module.roadmap.goal.experienceLevel
+  );
+
+  return prisma.$transaction(async (tx) => {
+    const existingLesson =
+      await getLessonByModuleId(moduleId);
+
+    if (!existingLesson) {
+      return createLesson(
+        tx,
+        module.id,
+        generatedLesson.title,
+        generatedLesson.content
+      );
+    }
+
+    return updateLesson(
+      tx,
+      existingLesson.id,
+      generatedLesson.title,
+      generatedLesson.content
     );
   });
 };

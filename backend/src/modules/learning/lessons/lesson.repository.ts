@@ -25,3 +25,20 @@ export const getLessonByModuleId = async (
     },
   });
 };
+
+export const updateLesson = async (
+  tx: Prisma.TransactionClient,
+  lessonId: string,
+  title: string,
+  content: string
+) => {
+  return tx.lesson.update({
+    where: {
+      id: lessonId,
+    },
+    data: {
+      title,
+      content,
+    },
+  });
+};

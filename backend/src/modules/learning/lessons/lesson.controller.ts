@@ -3,6 +3,7 @@ import { sendResponse } from "../../../shared/utils/response.js";
 import {
   generateLessonService,
   getLessonService,
+  regenerateLessonService,
 } from "./lesson.service.js";
 
 export const generateLessonController = async (
@@ -40,6 +41,28 @@ export const getLessonController = async (
       res,
       200,
       "Lesson fetched successfully",
+      lesson
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const regenerateLessonController = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const lesson =
+      await regenerateLessonService(
+        req.params.moduleId as string
+      );
+
+    return sendResponse(
+      res,
+      200,
+      "Lesson regenerated successfully",
       lesson
     );
   } catch (error) {
