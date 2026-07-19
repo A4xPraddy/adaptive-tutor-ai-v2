@@ -103,14 +103,54 @@ Mention production-level best practices.
 
 Give one hands-on exercise.
 
-# Quiz
-
-Generate 5 MCQs.
-
 # Summary
 
 Summarize the lesson in 4-6 bullet points.
 
 Return ONLY markdown.
+`;
+};
+
+export const buildQuizPrompt = (
+  topic: string,
+  level: string
+) => {
+  return `
+You are a senior software engineer and technical interviewer.
+
+Generate a quiz for the following topic.
+
+Topic:
+${topic}
+
+Student Level:
+${level}
+
+Requirements:
+
+- Return ONLY valid JSON.
+- Do NOT use markdown.
+- Do NOT wrap the response inside triple backticks.
+- Generate exactly 10 multiple choice questions.
+- Questions should progress from easy to moderate.
+- Only one correct answer.
+- Keep explanations concise.
+
+Return JSON exactly in this format:
+
+[
+  {
+    "question": "What is JavaScript?",
+    "optionA": "A database",
+    "optionB": "A programming language",
+    "optionC": "An operating system",
+    "optionD": "A browser",
+    "correctAnswer": "B",
+    "explanation": "JavaScript is a programming language.",
+    "order": 1
+  }
+]
+
+Return ONLY the JSON array.
 `;
 };

@@ -31,6 +31,12 @@ enum ProgressStatus {
   COMPLETED
 }
 
+enum QuizAttemptStatus {
+  IN_PROGRESS
+  PASSED
+  FAILED
+}
+
 model User {
   id         String   @id @default(uuid())
   fullName   String
@@ -39,9 +45,11 @@ model User {
   role       UserRole @default(STUDENT)
   isVerified Boolean  @default(false)
 
-  // Relations
-  goals    Goal[]
+  goals Goal[]
+
   progress Progress[]
+
+  quizAttempts QuizAttempt[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -59,9 +67,8 @@ model Goal {
 
   status GoalStatus @default(ACTIVE)
 
-  // Relations
   userId String
-  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   roadmaps Roadmap[]
 
@@ -77,9 +84,8 @@ model Roadmap {
   title       String
   description String?
 
-  // Relations
   goalId String
-  goal   Goal @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  goal   Goal   @relation(fields: [goalId], references: [id], onDelete: Cascade)
 
   modules RoadmapModule[]
 
@@ -97,7 +103,6 @@ model RoadmapModule {
 
   order Int
 
-  // Relations
   roadmapId String
   roadmap   Roadmap @relation(fields: [roadmapId], references: [id], onDelete: Cascade)
 
@@ -117,13 +122,87 @@ model Lesson {
   title   String
   content String
 
-  moduleId String @unique
+  moduleId String        @unique
   module   RoadmapModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+
+  quiz Quiz?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@index([moduleId])
+}
+
+model Quiz {
+  id String @id @default(uuid())
+
+  title String
+
+  lessonId String @unique
+  lesson   Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  questions QuizQuestion[]
+
+  attempts QuizAttempt[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([lessonId])
+}
+
+model QuizQuestion {
+  id String @id @default(uuid())
+
+  question String
+
+  optionA String
+  optionB String
+  optionC String
+  optionD String
+
+  correctAnswer String
+
+  explanation String?
+
+  order Int
+
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  answers QuizAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([quizId])
+}
+
+model QuizAttempt {
+  id String @id @default(uuid())
+
+  score Int
+
+  correctAnswers Int
+
+  totalQuestions Int
+
+  percentage Float
+
+  status QuizAttemptStatus
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  quizId String
+  quiz   Quiz   @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  answers QuizAnswer[]
+
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([quizId])
 }
 
 model Progress {
@@ -132,20 +211,38 @@ model Progress {
   status ProgressStatus @default(IN_PROGRESS)
 
   startedAt DateTime @default(now())
+
   completedAt DateTime?
 
-  // Relations
   userId String
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   moduleId String
-  module RoadmapModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  module   RoadmapModule @relation(fields: [moduleId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([userId, moduleId])
-
   @@index([userId])
   @@index([moduleId])
+}
+
+model QuizAnswer {
+  id String @id @default(uuid())
+
+  selectedAnswer String
+
+  isCorrect Boolean
+
+  questionId String
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  attemptId String
+  attempt   QuizAttempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@index([attemptId])
+  @@index([questionId])
 }
