@@ -91,12 +91,13 @@ export const createQuizAttempt = async (
 
 export const updateQuizAttempt = async (
   attemptId: string,
-  data: {
-    score: number;
-    totalQuestions: number;
-    correctAnswers: number;
-    status: QuizAttemptStatus;
-  },
+data: {
+  score: number;
+  totalQuestions: number;
+  correctAnswers: number;
+  percentage: number;
+  status: QuizAttemptStatus;
+},
   tx: Prisma.TransactionClient = prisma
 ) => {
   return tx.quizAttempt.update({

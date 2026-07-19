@@ -1,7 +1,7 @@
-import { Prisma, ProgressStatus } from "@prisma/client";
 import { prisma } from "../../../lib/prisma.js";
+import { ProgressStatus } from "@prisma/client";
 
-export const getProgressByUserAndModule = async (
+export const findProgressByUserAndModule = async (
   userId: string,
   moduleId: string
 ) => {
@@ -15,12 +15,11 @@ export const getProgressByUserAndModule = async (
   });
 };
 
-export const startProgress = async (
-  tx: Prisma.TransactionClient,
+export const createProgress = async (
   userId: string,
   moduleId: string
 ) => {
-  return tx.progress.create({
+  return prisma.progress.create({
     data: {
       userId,
       moduleId,
@@ -29,11 +28,8 @@ export const startProgress = async (
   });
 };
 
-export const completeProgress = async (
-  tx: Prisma.TransactionClient,
-  progressId: string
-) => {
-  return tx.progress.update({
+export const completeProgress = async (progressId: string) => {
+  return prisma.progress.update({
     where: {
       id: progressId,
     },
@@ -44,64 +40,58 @@ export const completeProgress = async (
   });
 };
 
-export const getGoalProgress = async (
+export const getModuleProgress = async (
   userId: string,
-  goalId: string
+  moduleId: string
 ) => {
-  return prisma.roadmap.findFirst({
+  return prisma.progress.findUnique({
+    where: {
+      userId_moduleId: {
+        userId,
+        moduleId,
+      },
+    },
+  });
+};
+
+export const getRoadmapModules = async (roadmapId: string) => {
+  return prisma.roadmapModule.findMany({
+    where: {
+      roadmapId,
+    },
+    select: {
+      id: true,
+    },
+  });
+};
+
+export const getGoalRoadmaps = async (goalId: string) => {
+  return prisma.roadmap.findMany({
     where: {
       goalId,
     },
-    include: {
+    select: {
+      id: true,
       modules: {
-        orderBy: {
-          order: "asc",
-        },
-        include: {
-          progress: {
-            where: {
-              userId,
-            },
-          },
+        select: {
+          id: true,
         },
       },
     },
   });
 };
 
-export const getContinueLearningModule = async (
+export const countCompletedModules = async (
   userId: string,
-  goalId: string
+  moduleIds: string[]
 ) => {
-  const roadmap = await prisma.roadmap.findFirst({
+  return prisma.progress.count({
     where: {
-      goalId,
-    },
-    include: {
-      modules: {
-        orderBy: {
-          order: "asc",
-        },
-        include: {
-          progress: {
-            where: {
-              userId,
-            },
-          },
-        },
+      userId,
+      moduleId: {
+        in: moduleIds,
       },
+      status: ProgressStatus.COMPLETED,
     },
   });
-
-  if (!roadmap) {
-    return null;
-  }
-
-  return (
-    roadmap.modules.find(
-      (module) =>
-        module.progress.length === 0 ||
-        module.progress[0].status !== ProgressStatus.COMPLETED
-    ) ?? null
-  );
 };

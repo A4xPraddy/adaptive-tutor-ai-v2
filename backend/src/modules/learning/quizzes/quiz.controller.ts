@@ -12,7 +12,7 @@ export const generateQuizController = async (
   res: Response
 ) => {
   try {
-    const { moduleId } = req.params;
+    const moduleId = req.params.moduleId as string;
     const { level } = req.body;
 
     const quiz = await generateQuizService(
@@ -38,7 +38,7 @@ export const getQuizController = async (
   res: Response
 ) => {
   try {
-    const { lessonId } = req.params;
+    const lessonId = req.params.lessonId as string;
 
     const quiz = await getQuizService(lessonId);
 
@@ -59,10 +59,10 @@ export const startQuizAttemptController = async (
   res: Response
 ) => {
   try {
-    const { quizId } = req.params;
+    const quizId = req.params.quizId as string;
 
     const attempt = await startQuizAttemptService(
-      req.user.id,
+      req.user!.id,
       quizId
     );
 
@@ -83,7 +83,7 @@ export const submitQuizController = async (
   res: Response
 ) => {
   try {
-    const { attemptId } = req.params;
+    const attemptId = req.params.attemptId as string;
     const { answers } = req.body;
 
     const result = await submitQuizService(

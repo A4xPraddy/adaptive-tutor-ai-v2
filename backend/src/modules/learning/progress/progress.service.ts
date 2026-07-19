@@ -1,122 +1,95 @@
-import { prisma } from "../../../lib/prisma.js";
 import { ProgressStatus } from "@prisma/client";
+import { prisma } from "../../../lib/prisma.js";
+
 import {
+  findProgressByUserAndModule,
+  createProgress,
   completeProgress,
-  getContinueLearningModule,
-  getGoalProgress,
-  getProgressByUserAndModule,
-  startProgress,
+  getRoadmapModules,
+  getGoalRoadmaps,
+  countCompletedModules,
 } from "./progress.repository.js";
-
-export const startProgressService = async (
+export const completeLessonService = async (
   userId: string,
-  moduleId: string
+  lessonId: string
 ) => {
-  const existingProgress = await getProgressByUserAndModule(
-    userId,
-    moduleId
-  );
+  const lesson = await prisma.lesson.findUnique({
+    where: {
+      id: lessonId,
+    },
+    select: {
+      moduleId: true,
+    },
+  });
 
-  if (existingProgress) {
-    return existingProgress;
+  if (!lesson) {
+    throw new Error("Lesson not found.");
   }
 
-  return prisma.$transaction(async (tx) => {
-    return startProgress(tx, userId, moduleId);
-  });
-};
-
-export const completeProgressService = async (
-  userId: string,
-  moduleId: string
-) => {
-  const progress = await getProgressByUserAndModule(
+  let progress = await findProgressByUserAndModule(
     userId,
-    moduleId
+    lesson.moduleId
   );
 
   if (!progress) {
-    return prisma.$transaction(async (tx) => {
-      const started = await startProgress(
-        tx,
-        userId,
-        moduleId
-      );
-
-      return completeProgress(tx, started.id);
-    });
+    progress = await createProgress(userId, lesson.moduleId);
   }
 
-  if (progress.status === ProgressStatus.COMPLETED) {
-    return progress;
+  if (progress.status !== ProgressStatus.COMPLETED) {
+    progress = await completeProgress(progress.id);
   }
 
-  return prisma.$transaction(async (tx) => {
-    return completeProgress(tx, progress.id);
-  });
+  return progress;
+};
+
+export const getRoadmapProgressService = async (
+  userId: string,
+  roadmapId: string
+) => {
+  const modules = await getRoadmapModules(roadmapId);
+
+  const moduleIds = modules.map((m) => m.id);
+
+  const completed = await countCompletedModules(
+    userId,
+    moduleIds
+  );
+
+  const percentage =
+    moduleIds.length === 0
+      ? 0
+      : Math.round((completed / moduleIds.length) * 100);
+
+  return {
+    totalModules: moduleIds.length,
+    completedModules: completed,
+    percentage,
+  };
 };
 
 export const getGoalProgressService = async (
   userId: string,
   goalId: string
 ) => {
-  const roadmap = await getGoalProgress(userId, goalId);
+  const roadmaps = await getGoalRoadmaps(goalId);
 
-  if (!roadmap) {
-    throw new Error("Roadmap not found");
-  }
+  const moduleIds = roadmaps.flatMap((roadmap) =>
+    roadmap.modules.map((module) => module.id)
+  );
 
-  const totalModules = roadmap.modules.length;
-
-  const completedModules = roadmap.modules.filter(
-    (module) =>
-      module.progress.length > 0 &&
-      module.progress[0].status === ProgressStatus.COMPLETED
-  ).length;
-
-  const inProgressModules = roadmap.modules.filter(
-    (module) =>
-      module.progress.length > 0 &&
-      module.progress[0].status === ProgressStatus.IN_PROGRESS
-  ).length;
-
-  const remainingModules =
-    totalModules - completedModules - inProgressModules;
+  const completed = await countCompletedModules(
+    userId,
+    moduleIds
+  );
 
   const percentage =
-    totalModules === 0
+    moduleIds.length === 0
       ? 0
-      : Number(
-          (
-            (completedModules / totalModules) *
-            100
-          ).toFixed(2)
-        );
+      : Math.round((completed / moduleIds.length) * 100);
 
   return {
-    roadmapId: roadmap.id,
-    goalId,
-    totalModules,
-    completedModules,
-    inProgressModules,
-    remainingModules,
+    totalModules: moduleIds.length,
+    completedModules: completed,
     percentage,
   };
-};
-
-export const continueLearningService = async (
-  userId: string,
-  goalId: string
-) => {
-  const module =
-    await getContinueLearningModule(
-      userId,
-      goalId
-    );
-
-  if (!module) {
-    return null;
-  }
-
-  return module;
 };

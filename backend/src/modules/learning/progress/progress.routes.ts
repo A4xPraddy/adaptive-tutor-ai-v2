@@ -1,36 +1,42 @@
 import { Router } from "express";
 import { protectRoute } from "../../auth/auth.middleware.js";
+
 import {
-  completeProgressController,
-  continueLearningController,
+  completeLessonController,
+  getRoadmapProgressController,
   getGoalProgressController,
-  startProgressController,
 } from "./progress.controller.js";
 
 const router = Router();
 
+/**
+ * Mark lesson as completed
+ * POST /api/v1/progress/complete/:lessonId
+ */
 router.post(
-  "/start/:moduleId",
+  "/complete/:lessonId",
   protectRoute,
-  startProgressController
+  completeLessonController
 );
 
-router.post(
-  "/complete/:moduleId",
-  protectRoute,
-  completeProgressController
-);
-
+/**
+ * Get roadmap progress
+ * GET /api/v1/progress/roadmap/:roadmapId
+ */
 router.get(
-  "/:goalId",
+  "/roadmap/:roadmapId",
+  protectRoute,
+  getRoadmapProgressController
+);
+
+/**
+ * Get goal progress
+ * GET /api/v1/progress/goal/:goalId
+ */
+router.get(
+  "/goal/:goalId",
   protectRoute,
   getGoalProgressController
-);
-
-router.get(
-  "/continue/:goalId",
-  protectRoute,
-  continueLearningController
 );
 
 export default router;

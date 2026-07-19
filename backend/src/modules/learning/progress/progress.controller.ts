@@ -1,28 +1,29 @@
-import { NextFunction, Response } from "express";
-import { sendResponse } from "../../../shared/utils/response.js";
+import { Response, NextFunction } from "express";
 import { AuthRequest } from "../../auth/auth.middleware.js";
+
 import {
-  completeProgressService,
-  continueLearningService,
+  completeLessonService,
+  getRoadmapProgressService,
   getGoalProgressService,
-  startProgressService,
 } from "./progress.service.js";
 
-export const startProgressController = async (
+import { sendResponse } from "../../../shared/utils/response.js";
+
+export const completeLessonController = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const progress = await startProgressService(
+    const progress = await completeLessonService(
       req.user!.id,
-      req.params.moduleId as string
+      req.params.lessonId as string
     );
 
     return sendResponse(
       res,
-      201,
-      "Progress started successfully",
+      200,
+      "Lesson marked as completed.",
       progress
     );
   } catch (error) {
@@ -30,21 +31,21 @@ export const startProgressController = async (
   }
 };
 
-export const completeProgressController = async (
+export const getRoadmapProgressController = async (
   req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const progress = await completeProgressService(
+    const progress = await getRoadmapProgressService(
       req.user!.id,
-      req.params.moduleId as string
+      req.params.roadmapId as string
     );
 
     return sendResponse(
       res,
       200,
-      "Module completed successfully",
+      "Roadmap progress fetched successfully.",
       progress
     );
   } catch (error) {
@@ -66,30 +67,8 @@ export const getGoalProgressController = async (
     return sendResponse(
       res,
       200,
-      "Progress fetched successfully",
+      "Goal progress fetched successfully.",
       progress
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const continueLearningController = async (
-  req: AuthRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const module = await continueLearningService(
-      req.user!.id,
-      req.params.goalId as string
-    );
-
-    return sendResponse(
-      res,
-      200,
-      "Continue learning module fetched successfully",
-      module
     );
   } catch (error) {
     next(error);
