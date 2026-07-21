@@ -11,7 +11,7 @@ import roadmapRoutes from "./modules/learning/roadmap/roadmap.routes.js";
 import lessonRoutes from "./modules/learning/lessons/lesson.routes.js";
 import progressRoutes from "./modules/learning/progress/progress.routes.js";
 import quizRoutes from "./modules/learning/quizzes/quiz.routes.js";
-
+import tutorRoutes from "./modules/learning/tutor/tutor.routes.js";
 
 const app = express();
 // Security
@@ -40,6 +40,8 @@ app.use("/api/v1/roadmaps", roadmapRoutes);
 app.use("/api/v1/lessons", lessonRoutes);
 app.use("/api/v1/progress", progressRoutes);
 app.use("/api/v1/quizzes", quizRoutes);
+app.use("/api/v1/tutor", tutorRoutes);
+
 // Root Route
 app.get("/", (req, res) => {
   res.status(200).json({
