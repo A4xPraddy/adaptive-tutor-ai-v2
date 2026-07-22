@@ -1,20 +1,27 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
+import { AuthRequest } from "../../auth/auth.middleware.js";
+
 import { tutorChatService } from "./tutor.service.js";
 import { sendResponse } from "../../../shared/utils/response.js";
-import { TUTOR_MESSAGES } from "./tutor.constant.js";
+import { tutorChatSchema } from "./tutor.schema.js";
 
 export const tutorChatController = async (
-  req: Request,
+  req: AuthRequest,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const response = await tutorChatService();
+    const body = tutorChatSchema.parse(req.body);
+
+    const response = await tutorChatService(
+      body.lessonId,
+      body.message
+    );
 
     return sendResponse(
       res,
       200,
-      TUTOR_MESSAGES.CHAT_SUCCESS,
+      "Tutor response generated successfully.",
       response
     );
   } catch (error) {

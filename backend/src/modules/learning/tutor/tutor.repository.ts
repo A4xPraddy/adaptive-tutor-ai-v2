@@ -6,7 +6,6 @@ export const getLessonById = async (lessonId: string) => {
       id: lessonId,
     },
     select: {
-      id: true,
       title: true,
       content: true,
     },
